@@ -71,7 +71,15 @@
     (define/override (on-char ke)
       (case (send ke get-key-code)
         [(left right up down)
-          (set-direction (send ke get-key-code))
+          (if (or
+            [and (equal? direction 'right) (equal? (send ke get-key-code) 'left)]
+            [and (equal? direction 'left) (equal? (send ke get-key-code) 'right)]
+            [and (equal? direction 'up) (equal? (send ke get-key-code) 'down)]
+            [and (equal? direction 'down) (equal? (send ke get-key-code) 'up)]
+          )
+            (void)
+            (set-direction (send ke get-key-code))
+          )
           (if playing (refresh) (void))
         ]
       )
@@ -116,11 +124,11 @@
   [width (* cell (car grid))]
   [height (* cell (cadr grid))]
 ))
-(define board (new board% (parent window)))
+(define board (new board% [parent window]))
 
 (define timer 0)
 (define loop
-  (new timer% [interval (floor (/ 1000 rate))] [notify-callback (lambda ()
+  (new timer% [interval (/ 1000 rate)] [notify-callback (lambda ()
     (if playing
       (send board step (lambda ()
         (set! timer (+ 1 timer))
