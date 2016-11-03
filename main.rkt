@@ -105,10 +105,13 @@
           (send dc set-brush "red" 'solid)
           (send dc set-pen "white" 8 'solid)
           (send dc draw-rectangle (* (car food) cell) (* (cadr food) cell) cell cell)
+
+          (let ([text (format "Score: ~a" (round  (- (* 100 score) timer)))])
+            (send dc draw-text text 5 5)
+          )
         )
         (begin
-          (set! score (- (* 100 score) timer))
-          (let ([text (format "Game Over, Score: ~a" (round score))])
+          (let ([text (format "Game Over, Score: ~a" (round  (- (* 100 score) timer)))])
             (send dc draw-text text 5 5)
           )
         )
