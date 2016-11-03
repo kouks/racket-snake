@@ -1,7 +1,7 @@
 #lang racket/gui
 
 (define grid '(25 15))
-(define cell 30)
+(define cell 50)
 (define rate 10)
 (define score 0)
 (define playing #t)
@@ -14,10 +14,18 @@
 
 (define (get-new-snake snake dir)
   (cond
-    [(equal? dir 'up) (move-snake snake (list (caar snake) (if (= 0 (cadar snake)) 14 (- (cadar snake) 1))))]
-    [(equal? dir 'down) (move-snake snake (list (caar snake) (if (= 14 (cadar snake)) 0 (+ (cadar snake) 1))))]
-    [(equal? dir 'left) (move-snake snake (list (if (= 0 (caar snake)) 24 (- (caar snake) 1)) (cadar snake)))]
-    [(equal? dir 'right) (move-snake snake (list (if (= 24 (caar snake)) 0 (+ (caar snake) 1)) (cadar snake)))]
+    [(equal? dir 'up)
+      (move-snake snake (list (caar snake) (if (= 0 (cadar snake)) (- (cadr grid) 1) (- (cadar snake) 1))))
+    ]
+    [(equal? dir 'down)
+      (move-snake snake (list (caar snake) (if (= (- (cadr grid) 1) (cadar snake)) 0 (+ (cadar snake) 1))))
+    ]
+    [(equal? dir 'left)
+      (move-snake snake (list (if (= 0 (caar snake)) (- (car grid) 1) (- (caar snake) 1)) (cadar snake)))
+    ]
+    [(equal? dir 'right)
+      (move-snake snake (list (if (= (- (car grid) 1) (caar snake)) 0 (+ (caar snake) 1)) (cadar snake)))
+    ]
   )
 )
 
@@ -33,7 +41,7 @@
 
 (define (new-food snake)
   (set! score (+ score 1))
-  (set! rate (* rate 1.001))
+  (set! rate (* rate 1.01))
   (send loop start (inexact->exact (floor (/ 1000 rate))))
   (let ([x (random (car grid))] [y (random (cadr grid))])
     (if (member (list x y) snake)
@@ -64,7 +72,7 @@
       (case (send ke get-key-code)
         [(left right up down)
           (set-direction (send ke get-key-code))
-          (refresh)
+          (if playing (refresh) (void))
         ]
       )
     )
@@ -91,7 +99,7 @@
           (send dc draw-rectangle (* (car food) cell) (* (cadr food) cell) cell cell)
         )
         (begin
-          (set! score (* 1000 (/ score timer)))
+          (set! score (- (* 100 score) timer))
           (let ([text (format "Game Over, Score: ~a" (round score))])
             (send dc draw-text text 5 5)
           )
